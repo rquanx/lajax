@@ -6,3 +6,4 @@
  */
 import Lajax from './lajax-module';
 window.Lajax = Lajax;
+export default Lajax;
