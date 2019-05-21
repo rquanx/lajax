@@ -14,10 +14,22 @@ function check(condiction, message) {
 function getAttributeList(queue) {
   return queue.map((item) => {
     return {
-      Message: encodeURI(JSON.stringify(item.messages)),
-      Time: item.time,
-      Level: item.level,
-      Agent: encodeURI(item.agent)
+      Message: {
+        value: encodeURI(JSON.stringify(item.messages)),
+        type: "Text"
+      },
+      Time: {
+        value: item.time,
+        type: "Text"
+      },
+      Level: {
+        value: item.level,
+        type: "Text"
+      },
+      Agent: {
+        value: item.agent,
+        type: "Text"
+      }
     };
   });
 }
@@ -504,6 +516,12 @@ class Lajax {
     let attributeList = getAttributeList(this.queue);
 
     function sendSuccess(result) {
+      // 日志发送成功，从队列中去除已发送的
+      that.queue.splice(0, logCount);
+
+      // 重置请求出错次数
+      that.errorReq = 0;
+
       if (console) {
         if (that.stylize) {
           console.log(
@@ -518,7 +536,7 @@ class Lajax {
     }
 
     function sendError(result) {
-      that._printConsole(null, Lajax.levelEnum.error, `JSOM发送日志请求失败！`);
+      that._printConsole(null, Lajax.levelEnum.error, `JSOM发送日志请求失败！`,result);
       that._checkErrorReq();
       return result;
     }
@@ -622,7 +640,6 @@ class Lajax {
    */
   _getTimeString(time) {
     const now = time === null ? new Date() : time;
-
     // 时
     let hour = String(now.getHours());
     if (hour.length === 1) {
